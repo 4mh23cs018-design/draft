@@ -88,12 +88,12 @@
   /* ── Chat Bubbles ── */
   .bubble-user {
     @apply ml-auto max-w-[82%] px-4 py-3 rounded-2xl rounded-br-sm text-sm leading-relaxed
-           bg-brand-600/90 text-white;
+           bg-brand-600/90 text-white whitespace-pre-wrap;
   }
 
   .bubble-ai {
     @apply mr-auto max-w-[90%] px-4 py-3 rounded-2xl rounded-bl-sm text-sm leading-relaxed
-           bg-surface-800/80 border border-white/[0.06] text-slate-100;
+           bg-surface-800/80 border border-white/[0.06] text-slate-100 whitespace-pre-wrap;
   }
 
   /* ── Typing Dots ── */

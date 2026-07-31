@@ -228,8 +228,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ documentCount }) => {
             value={input}
             onChange={onTextareaChange}
             onKeyDown={onKeyDown}
-            placeholder={documentCount > 0 ? 'Ask a question about your documents…' : 'Upload documents first…'}
-            disabled={documentCount === 0 || loading}
+            placeholder={documentCount > 0 ? 'Ask a question about your documents…' : 'Ask a question (no docs uploaded yet)…'}
+            disabled={loading}
             rows={1}
             className="input-field resize-none leading-relaxed flex-1"
             style={{ maxHeight: '160px' }}
@@ -237,7 +237,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ documentCount }) => {
           <button
             id="send-chat-btn"
             onClick={handleSend}
-            disabled={!input.trim() || loading || documentCount === 0}
+            disabled={!input.trim() || loading}
             className="btn-primary shrink-0 h-11 w-11 p-0 flex items-center justify-center"
           >
             {loading ? <Loader2 size={16} className="animate-spin" /> : <Send size={15} />}
