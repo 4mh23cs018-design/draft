@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  # ── PostgreSQL + pgvector ──────────────────────────────────────────────────
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: rag_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER:     ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB:       ${POSTGRES_DB:-rag_db}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-rag_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── FastAPI Backend ────────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rag_api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      OPENAI_API_KEY:   ${OPENAI_API_KEY}
+      DATABASE_URL:     postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-rag_db}
+      SYNC_DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-rag_db}
+      CHUNK_SIZE:       ${CHUNK_SIZE:-500}
+      CHUNK_OVERLAP:    ${CHUNK_OVERLAP:-50}
+      TOP_K:            ${TOP_K:-5}
+      EMBEDDING_MODEL:  ${EMBEDDING_MODEL:-text-embedding-3-small}
+      LLM_MODEL:        ${LLM_MODEL:-gpt-4o-mini}
+      MAX_UPLOAD_SIZE_MB: ${MAX_UPLOAD_SIZE_MB:-25}
+      RERANK_ENABLED:   ${RERANK_ENABLED:-false}
+      RERANK_PROVIDER:  ${RERANK_PROVIDER:-score}
+      COHERE_API_KEY:   ${COHERE_API_KEY:-}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend:ro
+
+volumes:
+  pg_data:
